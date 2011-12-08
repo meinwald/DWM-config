@@ -69,6 +69,20 @@ static const char *dmenucmd[] = { "dmenu_run", "-fn", font, "-nb", normbgcolor, 
 static const char *termcmd[]  = { "gnome-terminal", NULL };
 static const char *quitXcmd[] = { "killall", "dwm", NULL };
 
+/* shift selected tags i places, wrapping around */
+void viewNext(const Arg *arg) {
+    unsigned int cur = selmon->tagset[selmon->seltags];
+    int i = arg->i;
+    if (arg->i < 0) {
+        Arg a = {.ui = (cur >> -i) | (cur << (LENGTH(tags) + i))};
+        view(&a);
+    }
+    else {
+        Arg a = {.ui = (cur << i) | (cur >> (LENGTH(tags) - i))};
+        view(&a);
+    }
+}
+
 static Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
@@ -103,6 +117,8 @@ static Key keys[] = {
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 	{ MODKEY|ShiftMask|ControlMask, XK_q,      spawn,          {.v = quitXcmd} },
+	{ MODKEY|ControlMask,           XK_Left,   viewNext,       {.i = -1} },
+	{ MODKEY|ControlMask,           XK_Right,  viewNext,       {.i = +1} },
 };
 
 /* button definitions */
@@ -120,5 +136,7 @@ static Button buttons[] = {
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+	{ ClkTagBar,            0,              Button4,        viewNext,       {.i = -1} },
+	{ ClkTagBar,            0,              Button5,        viewNext,       {.i = +1} },
 };
 
